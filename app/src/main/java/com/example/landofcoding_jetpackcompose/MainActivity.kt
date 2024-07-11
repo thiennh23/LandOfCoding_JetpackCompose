@@ -104,7 +104,7 @@ class MainActivity : ComponentActivity() {
                     textValue =  state.text,
                     onValueChange = {viewModel.updateText(it)},
                     onAddClick = {
-                    viewModel.updateNameList(state.text)
+                    viewModel.updateNameList()
                     viewModel.updateText("")
                 })
             }
