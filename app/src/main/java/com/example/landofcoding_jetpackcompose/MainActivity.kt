@@ -42,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,41 +57,55 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
 import com.example.landofcoding_jetpackcompose.ui.theme.LandOfCodingJetpackComposeTheme
 import com.example.landofcoding_jetpackcompose.ui.theme.Purple40
 import com.example.landofcoding_jetpackcompose.ui.theme.Purple80
 import com.example.landofcoding_jetpackcompose.ui.theme.PurpleGrey80
 
 class MainActivity : ComponentActivity() {
+
+    val viewModel by lazy { ViewModelProvider(this).get(MyViewModel::class.java) }
+
     @SuppressLint("UnrememberedMutableState", "RememberReturnType")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+
+            val state = viewModel.state.value
+
         LandOfCodingJetpackComposeTheme {
 
             Column(modifier = Modifier.fillMaxSize()) {
 
-                var textState by remember {
+               /* //But the state will reset after we rotate the screen. So we will use rememberSaveable instead of remember
+                //BUt it will only work with mutableStateOf()
+                var textState by rememberSaveable {
                     mutableStateOf("")
                 }
 
+                //Because rememberSaveable cannot work with mutableListListOf()
+                //=> We will use ViewModel
                 var nameListState = remember {
                     mutableStateListOf<String>()
-                }
+                }*/
 
                 LazyColumn(modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f))
                 {
-                    items(nameListState.size) {
-                        Text(text = nameListState[it])
+                    items(state.namesList.size) {
+                        Text(text = state.namesList[it])
                     }
                 }
 
-                StateLess(textState, onValueChange = {textState = it}, onAddClick = {
-                    nameListState.add(textState)
-                    textState = ""
+                StateLess(
+                    textValue =  state.text,
+                    onValueChange = {viewModel.updateText(it)},
+                    onAddClick = {
+                    viewModel.updateNameList(state.text)
+                    viewModel.updateText("")
                 })
             }
 
