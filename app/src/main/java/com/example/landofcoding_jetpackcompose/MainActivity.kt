@@ -1,5 +1,6 @@
 package com.example.landofcoding_jetpackcompose
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.widget.Space
@@ -23,16 +24,25 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,18 +62,116 @@ import com.example.landofcoding_jetpackcompose.ui.theme.Purple80
 import com.example.landofcoding_jetpackcompose.ui.theme.PurpleGrey80
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("UnrememberedMutableState", "RememberReturnType")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-        Test()
-        }
+        LandOfCodingJetpackComposeTheme {
+
+            Column(modifier = Modifier.fillMaxSize()) {
+
+                var textState by remember {
+                    mutableStateOf("")
+                }
+
+                var nameListState = remember {
+                    mutableStateListOf<String>()
+                }
+
+                LazyColumn(modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f))
+                {
+                    items(nameListState.size) {
+                        Text(text = nameListState[it])
+                    }
+                }
+
+                StateLess(textState, onValueChange = {textState = it}, onAddClick = {
+                    nameListState.add(textState)
+                    textState = ""
+                })
+            }
+
+        } }
     }
 }
 
-//DAY3: Modifiers
+//DAY4: Jetpack Compose State, stateful, stateless, save the ui state
+//State is anything in your UI could change
 
 @Preview
+@Composable
+fun StatePreview() {
+//    StateFull()
+   /* var textState by remember {
+        mutableStateOf("")
+    }*/
+    //StateLess(textState, onValueChange = {textState = it})
+}
+
+//Stateless is when Composable does not create, holds and modify its own State.
+@Composable
+fun StateLess(
+    textValue: String,
+    onValueChange: (String) -> Unit,
+    onAddClick:() -> Unit
+) {
+
+    TextField(
+        value = textValue,
+        onValueChange = {
+            onValueChange(it) },
+        modifier = Modifier.fillMaxWidth(),
+        trailingIcon = {
+            Icon(imageVector = Icons.Default.Add, contentDescription = null, Modifier.clickable {
+                onAddClick()
+            })
+        }
+    )
+
+
+}
+
+
+//THIS IS STATEFUL
+//Stateful is when Composable create, holds and modifies its own State.
+//WHEN YOU CALL StateUI() in the main function, it doesn't care about state => Stateful
+//The weakness of Stateful is that it tends to be less reusable and difficult to test.
+@Composable
+fun StateFull() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+
+        /*val textState = remember {
+            mutableStateOf("")
+        }
+
+        TextField(
+            value = textState.value, onValueChange = {
+                textState.value = it
+        }, Modifier.fillMaxWidth())
+         */
+
+        //After the recomposition, the value return back to ""
+        //So we need to use the keyword remember for the variable to store data
+
+        var textState by remember {
+            mutableStateOf("")
+        }
+
+        TextField(
+            value = textState, onValueChange = {
+                textState = it
+            }, Modifier.fillMaxWidth())
+    }
+}
+
+
+
+//DAY3: Modifiers
+
+//@Preview
 @Composable
 fun ModifierPreview() {
     //modifierFunc()
